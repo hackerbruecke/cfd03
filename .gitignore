@@ -4,3 +4,4 @@
 *.o
 lbsim
 *.vtk
+!lbm_tilted_plate.vtk

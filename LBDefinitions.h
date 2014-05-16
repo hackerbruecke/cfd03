@@ -24,12 +24,17 @@ static const int FLUID = 0;
 static const int NO_SLIP = 1;
 static const int MOVING_WALL = 2;
 
-static inline int idx(int xlength, int x, int y, int z, int i) {
-    return Q * (z * (xlength+2) * (xlength+2) + y * (xlength+2) + x) + i;
+static const int FREE_SLIP = 3;
+static const int INFLOW = 4;
+static const int OUTFLOW = 5;
+static const int PRESSURE_IN = 6;
+
+static inline int idx(int* xlength, int x, int y, int z, int i) {
+    return Q * (z * (xlength[2] + 2) * (xlength[2] + 2) + y * (xlength[1] + 2) + x) + i;
 }
 
-static inline int fidx(int xlength, int x, int y, int z) {
-    return z * (xlength+2) * (xlength+2) + y * (xlength+2) + x;
+static inline int fidx(int* xlength, int x, int y, int z) {
+    return z * (xlength[2] + 2) * (xlength[2] + 2) + y * (xlength[2] + 2) + x;
 }
 
 static inline int inv(int idx) {
