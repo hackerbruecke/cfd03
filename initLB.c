@@ -9,10 +9,9 @@ int readParameters(int *xlength, double *tau, double *velocityWall, int *timeste
 	}
 	const char *filename = argv[1];
 	/* Reading all the input parameters */
-/*	READ_INT(filename, *xlength);*/
-	xlength[0] = 20;
-	xlength[1] = 10;
-	xlength[2] = 10;
+	read_int(filename, "xlength", &xlength[0]);
+	read_int(filename, "ylength", &xlength[1]);
+	read_int(filename, "zlength", &xlength[2]);
 	READ_DOUBLE(filename, *tau);
     read_double(filename, "vwallx", &velocityWall[0]);
     read_double(filename, "vwally", &velocityWall[1]);
@@ -51,7 +50,7 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
             flagField[fidx(xlength, xlength[0]+1, y, z)] = NO_SLIP;
         }
     }
-/* Stream and Collide Fields are initialized to the respective Latticeweights of the Cell */
+    /* Stream and Collide Fields are initialized to the respective Latticeweights of the Cell */
     for (int x = 0; x < xlength[0] + 2; ++x) {
         for (int y = 0; y < xlength[1] + 2; ++y) {
             for (int z = 0; z < xlength[2] + 2; ++z) {
