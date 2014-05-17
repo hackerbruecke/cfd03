@@ -1,14 +1,14 @@
 #include "streaming.h"
 #include "LBDefinitions.h"
 
-void doStreaming(double *collideField, double *streamField,int *flagField,int xlength){
+void doStreaming(double *collideField, double *streamField, int *flagField, const int *xlength){
 
 	int dx, dy, dz;
 	double fi;
 	/*Setting distribution function for each moving direction/lattice velocity of every particle*/
-	for (int z = 1; z < xlength + 1; ++z) {
-		for (int y = 1; y < xlength + 1; ++y) {
-			for (int x = 1; x < xlength + 1; ++x) {
+	for (int z = 1; z < xlength[2] + 1; ++z) {
+		for (int y = 1; y < xlength[1] + 1; ++y) {
+			for (int x = 1; x < xlength[0] + 1; ++x) {
 				for (int i = 0; i < Q; ++i) {
 
 					/*dx = c_i_x*dt, dt = 1*/
@@ -23,8 +23,10 @@ void doStreaming(double *collideField, double *streamField,int *flagField,int xl
 
 					Position of that next particle is given by (x-dx, y-dy, z-dz)*/
 
-					fi = collideField[Q * ((z-dz)*(xlength+2)*(xlength+2) + (y-dy)*(xlength+2) + x-dx) + i];
-					streamField[Q * (z*(xlength+2)*(xlength+2) + y*(xlength+2) + x) + i] = fi;
+//					fi = collideField[Q * ((z-dz)*(xlength[2]+2)*(xlength[2]+2) + (y-dy)*(xlength[1]+2) + x-dx) + i];
+					fi = collideField[idx(xlength, x-dx, y-dy, z-dz, i)];
+//					streamField[Q * (z*(xlength[2]+2)*(xlength+2) + y*(xlength+2) + x) + i] = fi;
+					streamField[idx(xlength, x, y, z, i)] = fi;
 				}
 			}
 		}

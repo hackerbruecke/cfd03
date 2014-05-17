@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 	double *collideField = NULL;
 	double *streamField = NULL;
 	int *flagField = NULL;
-	int xlength;
+	int xlength[3];
 	double tau;
 	double velocityWall[D];
 	int timesteps;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     printf("LBM simulation by Krivokapic, Mody, Malcher - CFD Lab SS2014\n");
     printf("============================================================\n");
     printf("Reading in parameters...\n");
-	if (readParameters(&xlength, &tau, velocityWall, &timesteps,
+	if (readParameters(xlength, &tau, velocityWall, &timesteps,
 			&timestepsPerPlotting, argc, argv)) {
 		printf("Reading in parameters failed. Aborting program!\n");
 		exit(-1);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     
     printf("Starting LBM...\n");
     /* (xlength+2)^D elements must be stored for all lattices including boundaries */
-    const int xl_to3 = (xlength + 2) * (xlength + 2) * (xlength + 2);
+    const int xl_to3 = (xlength[0] + 2) * (xlength[1] + 2) * (xlength[2] + 2);
     collideField = malloc(sizeof *collideField * Q * xl_to3);
     streamField = malloc(sizeof *streamField * Q * xl_to3);
     flagField = malloc(sizeof *flagField * xl_to3);

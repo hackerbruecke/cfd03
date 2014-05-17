@@ -9,7 +9,10 @@ int readParameters(int *xlength, double *tau, double *velocityWall, int *timeste
 	}
 	const char *filename = argv[1];
 	/* Reading all the input parameters */
-	READ_INT(filename, *xlength);
+/*	READ_INT(filename, *xlength);*/
+	xlength[0] = 20;
+	xlength[1] = 10;
+	xlength[2] = 10;
 	READ_DOUBLE(filename, *tau);
     read_double(filename, "vwallx", &velocityWall[0]);
     read_double(filename, "vwally", &velocityWall[1]);
@@ -21,37 +24,37 @@ int readParameters(int *xlength, double *tau, double *velocityWall, int *timeste
 }
 
 
-void initialiseFields(double *collideField, double *streamField, int *flagField, int xlength){
+void initialiseFields(double *collideField, double *streamField, int *flagField, const int *xlength){
     /* Set all values of flagField to 0, i.e. FLUID state. We will apply boundary conditions
         in the following */
-    memset(flagField, FLUID, (xlength + 2)*(xlength + 2)*(xlength + 2) * sizeof(*flagField));
+    memset(flagField, FLUID, (xlength[0] + 2)*(xlength[1] + 2)*(xlength[2] + 2) * sizeof(*flagField));
+
     /* The values for Boundary on Z = 0 set to No_Slip and Zmax plane set to Moving_Wall */ 
-
-    for (int x = 0; x < xlength + 2; ++x) {
-        for (int y = 0; y < xlength + 2; ++y) {
+    for (int x = 0; x < xlength[0] + 2; ++x) {
+        for (int y = 0; y < xlength[1] + 2; ++y) {
             flagField[fidx(xlength, x, y, 0)] = NO_SLIP;
-            flagField[fidx(xlength, x, y, xlength+1)] = MOVING_WALL;
+            flagField[fidx(xlength, x, y, xlength[2]+1)] = MOVING_WALL;
         }
     }
 
-/* The values for Boundary on Y = 0 and Ymax plane set to No_Slip */
-    for (int x = 0; x < xlength + 2; ++x) {
-        for (int z = 0; z < xlength + 2; ++z) {
+    /* The values for Boundary on Y = 0 and Ymax plane set to No_Slip */
+    for (int x = 0; x < xlength[0] + 2; ++x) {
+        for (int z = 0; z < xlength[2] + 2; ++z) {
             flagField[fidx(xlength, x, 0, z)] = NO_SLIP;
-            flagField[fidx(xlength, x, xlength+1, z)] = NO_SLIP;
+            flagField[fidx(xlength, x, xlength[1]+1, z)] = NO_SLIP;
         }
     }
-/* The values for Boundary on Y = 0 and Ymax plane set to No_Slip */
-    for (int y = 0; y < xlength + 2; ++y) {
-        for (int z = 0; z < xlength + 2; ++z) {
+    /* The values for Boundary on X = 0 and Xmax plane set to No_Slip */
+    for (int y = 0; y < xlength[1] + 2; ++y) {
+        for (int z = 0; z < xlength[2] + 2; ++z) {
             flagField[fidx(xlength, 0, y, z)] = NO_SLIP;
-            flagField[fidx(xlength, xlength+1, y, z)] = NO_SLIP;
+            flagField[fidx(xlength, xlength[0]+1, y, z)] = NO_SLIP;
         }
     }
 /* Stream and Collide Fields are initialized to the respective Latticeweights of the Cell */
-    for (int x = 0; x < xlength + 2; ++x) {
-        for (int y = 0; y < xlength + 2; ++y) {
-            for (int z = 0; z < xlength + 2; ++z) {
+    for (int x = 0; x < xlength[0] + 2; ++x) {
+        for (int y = 0; y < xlength[1] + 2; ++y) {
+            for (int z = 0; z < xlength[2] + 2; ++z) {
                 for (int i = 0; i < Q; ++i) {
                     collideField[idx(xlength, x, y, z, i)] = LATTICEWEIGHTS[i];
                     streamField[idx(xlength, x, y, z, i)] = LATTICEWEIGHTS[i];
