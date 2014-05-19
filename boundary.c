@@ -4,25 +4,11 @@
 #include <stdio.h>
 
 #if 1
-typedef enum {
-	XY0, XYMAX,
-	XZ0, XZMAX,
-	YZ0, YZMAX
-} PLANE;
-
-static const int plane_fi[6][5] = {
-		{ 14, 15, 16, 17, 18 }, /* XY0 */
-		{ 0, 1, 2, 3, 4 },		/* XYMAX */
-		{ 4, 11, 12, 13, 18 },	/* XZ0 */
-		{ 0, 5, 6, 7, 14 },		/* XZMAX */
-		{ 3, 7, 10, 13, 17 },	/* YZ0 */
-		{ 1, 5, 8, 11, 15 }		/* YZMAX */
-};
 
 static inline int inb(int x, int y, int z, int xmax, int ymax, int zmax) {
-	return  x > 0 && x < xmax + 1 &&
-			y > 0 && y < ymax + 1 &&
-			z > 0 && z < zmax + 1;
+	return  x > 0 && x < xmax &&
+			y > 0 && y < ymax &&
+			z > 0 && z < zmax;
 }
 
 void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, const int *xlength) {
@@ -30,6 +16,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	int xmax = xlength[0] + 1;
 	int ymax = xlength[1] + 1;
 	int zmax = xlength[2] + 1;
+
 	double density = 0;
 	double *currentCell;
 	int dx, dy, dz;
@@ -44,10 +31,8 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 					dx = LATTICEVELOCITIES[i][0];
 					dy = LATTICEVELOCITIES[i][1];
 					dz = LATTICEVELOCITIES[i][2];
-					if (inb(x+dx, y+dy, z+dz, xmax, ymax, zmax)) {
-					/*if (x+dx > 0 && x+dx < xmax+1 &&
-						y+dy > 0 && y+dy < ymax+1 &&
-						z+dz > 0 && z+dz < zmax+1) {*/
+					if (inb(x+dx, y+dy, z+dz, xmax, ymax, zmax) && flagField[fidx(xlength, x+dx, y+dy, z+dz)] == FLUID) {
+/*					if (inb(x, y, z, xmax, ymax, zmax) && flagField[fidx(xlength, x+dx, y+dy, z+dz)] == FLUID) {*/
 						switch (flagField[fidx(xlength, x, y, z)]) {
 						case NO_SLIP:
 						{
@@ -56,7 +41,6 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 						break;
 						case MOVING_WALL:
 						{
-							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
 							/* Moving wall */
 							double cdotu = 0.0;
 							for (int d = 0; d < D; ++d) {
@@ -66,6 +50,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 							currentCell = &collideField[idx(xlength, x, y, z, 0)];
 							computeDensity(currentCell, &density);
 							/* End moving wall */
+							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
 							collideField[idx(xlength, x, y, z, i)] = finv + 2*LATTICEWEIGHTS[i]*density*cdotu/(C_S*C_S);
 						}
 						break;
