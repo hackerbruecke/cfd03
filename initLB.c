@@ -31,8 +31,8 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
     /* The values for Boundary on Z = 0 set to No_Slip and Zmax plane set to Moving_Wall */
     for (int x = 0; x < xlength[0] + 2; ++x) {
         for (int y = 0; y < xlength[1] + 2; ++y) {
-            flagField[fidx(xlength, x, y, 0)] = NO_SLIP;
-            flagField[fidx(xlength, x, y, xlength[2]+1)] = MOVING_WALL;
+            flagField[fidx(xlength, x, y, 0)] = PRESSURE_IN;
+            flagField[fidx(xlength, x, y, xlength[2]+1)] = OUTFLOW;
         }
     }
 
@@ -46,8 +46,8 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
     /* The values for Boundary on X = 0 and Xmax plane set to No_Slip */
     for (int y = 0; y < xlength[1] + 2; ++y) {
         for (int z = 0; z < xlength[2] + 1; ++z) {
-            flagField[fidx(xlength, 0, y, z)] = NO_SLIP;
-            flagField[fidx(xlength, xlength[0]+1, y, z)] = NO_SLIP;
+            flagField[fidx(xlength, 0, y, z)] = FREE_SLIP;
+            flagField[fidx(xlength, xlength[0]+1, y, z)] = FREE_SLIP;
         }
     }
     /* Stream and Collide Fields are initialized to the respective Latticeweights of the Cell */
