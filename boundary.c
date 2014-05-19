@@ -71,55 +71,44 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 						case FREE_SLIP:
 						{
 							/* Normal inverting for 2, 6, 8, 10, 12, 16 */
-							int invidx = inv(i);
-							/* if other i, it will be changed in one of the following if statements */
-							/* TODO: This code must be improved */
-							if (x == 0) {
-								switch (i) {
-								case 1: invidx = 3; break;
-								case 5: invidx = 7; break;
-								case 11: invidx = 13; break;
-								case 15: invidx = 17; break;
-								}
-							} else if (x == xmax) {
-								switch (i) {
-								case 3: invidx = 1; break;
-								case 7: invidx = 5; break;
-								case 13: invidx = 11; break;
-								case 17: invidx = 15; break;
-								}
-
-							} else if (y == 0) {
-								switch (i) {
-								case 0: invidx = 4; break;
-								case 5: invidx = 11; break;
-								case 7: invidx = 13; break;
-								case 14: invidx = 18; break;
-								}
-							} else if (y == ymax) {
-								switch (i) {
-								case 4: invidx = 0; break;
-								case 11: invidx = 5; break;
-								case 13: invidx = 7; break;
-								case 18: invidx = 14; break;
-								}
-							} else if (z == 0) {
-								switch (i) {
-								case 0: invidx = 14; break;
-								case 1: invidx = 15; break;
-								case 3: invidx = 17; break;
-								case 4: invidx = 18; break;
-								}
-							} else if (z == zmax) {
-								switch (i) {
-								case 14: invidx = 0; break;
-								case 15: invidx = 1; break;
-								case 17: invidx = 3; break;
-								case 18: invidx = 4; break;
-								}
+							switch (i) {
+							case 2: /* DOWN */
+								collideField[idx(xlength, x, y, z, 0)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 14)];
+								collideField[idx(xlength, x, y, z, 1)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 15)];
+								collideField[idx(xlength, x, y, z, 3)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 17)];
+								collideField[idx(xlength, x, y, z, 4)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 18)];
+								break;
+							case 6: /* FRONT */
+								collideField[idx(xlength, x, y, z, 0)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 4)];
+								collideField[idx(xlength, x, y, z, 5)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 11)];
+								collideField[idx(xlength, x, y, z, 7)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 13)];
+								collideField[idx(xlength, x, y, z, 14)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 18)];
+								break;
+							case 8: /* LEFT */
+								collideField[idx(xlength, x, y, z, 1)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 3)];
+								collideField[idx(xlength, x, y, z, 5)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 7)];
+								collideField[idx(xlength, x, y, z, 11)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 13)];
+								collideField[idx(xlength, x, y, z, 15)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 17)];
+								break;
+							case 10: /* RIGHT */
+								collideField[idx(xlength, x, y, z, 3)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 1)];
+								collideField[idx(xlength, x, y, z, 7)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 5)];
+								collideField[idx(xlength, x, y, z, 13)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 11)];
+								collideField[idx(xlength, x, y, z, 17)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 15)];
+								break;
+							case 12: /* BACK */
+								collideField[idx(xlength, x, y, z, 4)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 0)];
+								collideField[idx(xlength, x, y, z, 11)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 5)];
+								collideField[idx(xlength, x, y, z, 13)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 7)];
+								collideField[idx(xlength, x, y, z, 18)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 14)];
+								break;
+							case 16: /* TOP */
+								collideField[idx(xlength, x, y, z, 14)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 0)];
+								collideField[idx(xlength, x, y, z, 15)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 1)];
+								collideField[idx(xlength, x, y, z, 17)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 3)];
+								collideField[idx(xlength, x, y, z, 18)] = collideField[idx(xlength, x+dx, y+dy, z+dz, 4)];
+								break;
 							}
-
-							collideField[idx(xlength, x, y, z, i)] = collideField[idx(xlength, x+dx, y+dy, z+dz, invidx)];
 						}
 						break;
 						case INFLOW:
