@@ -17,22 +17,38 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	int ymax = xlength[1] + 1;
 	int zmax = xlength[2] + 1;
 
-	double density = 0;
+	double rho = 0;
 	double *currentCell;
 	int dx, dy, dz;
+
+	/* Inflow: TODO: Read values from file!!! */
+	const double rho_ref = 1.0; /* rho_ref */
+	double v_in[3] = { 0, 0, 0.1 }; /* V_in */
+	double feq_in[Q];
+	/* Pressure in: TODO: Read value from file!!! */
+	const double rho_in = 1.005;
+	/* Outflow */
+	double v[3];
+	double feq_out[Q];
 
 	/* XY plane */
 	for (int x = 0; x < xlength[0] + 2; ++x) {
 		for (int y = 0; y < xlength[1] + 2; ++y) {
 			for (int z = 0; z < xlength[2] + 2; ++z) {
+				/* Take first distribution function of current cell */
+				currentCell = &collideField[idx(xlength, x, y, z, 0)];
+				/* Outflow/Moving wall conditions */
+				computeDensity(currentCell, &rho);
+				/* Outflow conditions */
+				computeVelocity(currentCell, &rho_ref, v);
+				computeFeq(&rho_ref, v, feq_out);
+
 				for (int i = 0; i < Q; ++i) {
-					/* Bottom, z = 0: Invert 0, 1, 2, 3, 4 */
-					/*index = plane_fi[XY0][i];*/
 					dx = LATTICEVELOCITIES[i][0];
 					dy = LATTICEVELOCITIES[i][1];
 					dz = LATTICEVELOCITIES[i][2];
+
 					if (inb(x+dx, y+dy, z+dz, xmax, ymax, zmax) && flagField[fidx(xlength, x+dx, y+dy, z+dz)] == FLUID) {
-/*					if (inb(x, y, z, xmax, ymax, zmax) && flagField[fidx(xlength, x+dx, y+dy, z+dz)] == FLUID) {*/
 						switch (flagField[fidx(xlength, x, y, z)]) {
 						case NO_SLIP:
 						{
@@ -46,18 +62,84 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 							for (int d = 0; d < D; ++d) {
 								cdotu += LATTICEVELOCITIES[i][d] * wallVelocity[d];
 							}
-							/* Take first distribution function of current cell */
-							currentCell = &collideField[idx(xlength, x, y, z, 0)];
-							computeDensity(currentCell, &density);
 							/* End moving wall */
 							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
-							collideField[idx(xlength, x, y, z, i)] = finv + 2*LATTICEWEIGHTS[i]*density*cdotu/(C_S*C_S);
+							collideField[idx(xlength, x, y, z, i)] = finv + 2*LATTICEWEIGHTS[i]*rho*cdotu/(C_S*C_S);
 						}
 						break;
-						case FLUID:
+						case FREE_SLIP:
+						{
+							/* Normal inverting for 2, 6, 8, 10, 12, 16 */
+							int invidx = inv(i);
+							/* if other i, it will be changed in one of the following if statements */
+							/* TODO: This code must be improved */
+							if (x == 0) {
+								switch (i) {
+								case 1: invidx = 3; break;
+								case 5: invidx = 7; break;
+								case 11: invidx = 13; break;
+								case 15: invidx = 17; break;
+								}
+							} else if (x == xmax) {
+								switch (i) {
+								case 3: invidx = 1; break;
+								case 7: invidx = 5; break;
+								case 13: invidx = 11; break;
+								case 17: invidx = 15; break;
+								}
+
+							} else if (y == 0) {
+								switch (i) {
+								case 0: invidx = 4; break;
+								case 5: invidx = 11; break;
+								case 7: invidx = 13; break;
+								case 14: invidx = 18; break;
+								}
+							} else if (y == ymax) {
+								switch (i) {
+								case 4: invidx = 0; break;
+								case 11: invidx = 5; break;
+								case 13: invidx = 7; break;
+								case 18: invidx = 14; break;
+								}
+							} else if (z == 0) {
+								switch (i) {
+								case 0: invidx = 14; break;
+								case 1: invidx = 15; break;
+								case 3: invidx = 17; break;
+								case 4: invidx = 18; break;
+								}
+							} else if (z == zmax) {
+								switch (i) {
+								case 14: invidx = 0; break;
+								case 15: invidx = 1; break;
+								case 17: invidx = 3; break;
+								case 18: invidx = 4; break;
+								}
+							}
+
+							collideField[idx(xlength, x, y, z, i)] = collideField[idx(xlength, x+dx, y+dy, z+dz, invidx)];
+						}
+						break;
+						case INFLOW:
+						{
+							/* Inflow conditions */
+							computeFeq(&rho_ref, v_in, feq_in);
+							collideField[idx(xlength, x, y, z, i)] = feq_in[i];
+						}
+						break;
+						case OUTFLOW:
+						{
+							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
+							collideField[idx(xlength, x, y, z, i)] = feq_out[inv(i)] + feq_out[i] - finv;
+						}
+						break;
+						case PRESSURE_IN:
+							/* Pressure in conditions TODO: Crosscheck! */
+							computeVelocity(currentCell, &rho_in, v_in);
+							computeFeq(&rho_in, v_in, feq_in);
+							collideField[idx(xlength, x, y, z, i)] = feq_in[i];
 							break;
-						default:
-							printf("None\n");
 						}
 					}
 				}
