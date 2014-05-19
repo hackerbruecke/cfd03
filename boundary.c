@@ -35,6 +35,9 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 	for (int x = 0; x < xlength[0] + 2; ++x) {
 		for (int y = 0; y < xlength[1] + 2; ++y) {
 			for (int z = 0; z < xlength[2] + 2; ++z) {
+				/* Ignore fluid cells */
+				if (flagField[fidx(xlength, x, y, z)] == FLUID)
+					continue;
 				/* Take first distribution function of current cell */
 				currentCell = &collideField[idx(xlength, x, y, z, 0)];
 				/* Outflow/Moving wall conditions */
