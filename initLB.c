@@ -28,7 +28,7 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
         in the following */
     memset(flagField, FLUID, (xlength[0] + 2)*(xlength[1] + 2)*(xlength[2] + 2) * sizeof(*flagField));
 
-    /* The values for Boundary on Z = 0 set to No_Slip and Zmax plane set to Moving_Wall */ 
+    /* The values for Boundary on Z = 0 set to No_Slip and Zmax plane set to Moving_Wall */
     for (int x = 0; x < xlength[0] + 2; ++x) {
         for (int y = 0; y < xlength[1] + 2; ++y) {
             flagField[fidx(xlength, x, y, 0)] = NO_SLIP;
@@ -38,14 +38,14 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
 
     /* The values for Boundary on Y = 0 and Ymax plane set to No_Slip */
     for (int x = 0; x < xlength[0] + 2; ++x) {
-        for (int z = 0; z < xlength[2] + 2; ++z) {
+        for (int z = 0; z < xlength[2] + 1; ++z) {
             flagField[fidx(xlength, x, 0, z)] = NO_SLIP;
             flagField[fidx(xlength, x, xlength[1]+1, z)] = NO_SLIP;
         }
     }
     /* The values for Boundary on X = 0 and Xmax plane set to No_Slip */
     for (int y = 0; y < xlength[1] + 2; ++y) {
-        for (int z = 0; z < xlength[2] + 2; ++z) {
+        for (int z = 0; z < xlength[2] + 1; ++z) {
             flagField[fidx(xlength, 0, y, z)] = NO_SLIP;
             flagField[fidx(xlength, xlength[0]+1, y, z)] = NO_SLIP;
         }
@@ -61,5 +61,18 @@ void initialiseFields(double *collideField, double *streamField, int *flagField,
             }
         }
     }
+    int xmax = xlength[0] + 1;
+    int ymax = xlength[1] + 1;
+    int zmax = xlength[2] + 1;
+    printf("(000) = %d\n", flagField[fidx(xlength, 0, 0, 0)]);
+    printf("(M00) = %d\n", flagField[fidx(xlength, xmax, 0, 0)]);
+    printf("(MM0) = %d\n", flagField[fidx(xlength, xmax, ymax, 0)]);
+    printf("(0M0) = %d\n", flagField[fidx(xlength, 0, ymax, 0)]);
+
+    printf("(00M) = %d\n", flagField[fidx(xlength, 0, 0, zmax)]);
+    printf("(M0M) = %d\n", flagField[fidx(xlength, xmax, 0, zmax)]);
+    printf("(MMM) = %d\n", flagField[fidx(xlength, xmax, ymax, zmax)]);
+    printf("(0MM) = %d\n", flagField[fidx(xlength, 0, ymax, zmax)]);
+
 }
 

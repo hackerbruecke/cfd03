@@ -29,11 +29,6 @@ typedef enum {
 	OUTFLOW = 5,
 	PRESSURE_IN = 6
 } STATE;
-#if 0 /* TODO: Remove when enum works */
-static const int FLUID = 0;
-static const int NO_SLIP = 1;
-static const int MOVING_WALL = 2;
-#endif
 
 static inline int idx(const int *xlength, int x, int y, int z, int i) {
     return Q * (z * (xlength[0]+2) * (xlength[1]+2) + y * (xlength[0]+2) + x) + i;

@@ -1,18 +1,96 @@
 #include "boundary.h"
 #include "LBDefinitions.h"
 #include "computeCellValues.h"
+#include <stdio.h>
 
-
-void treatBoundary(double *collideField, int* flagField,
-		const double * const wallVelocity, const int *xlength) {
 #if 1
+typedef enum {
+	XY0, XYMAX,
+	XZ0, XZMAX,
+	YZ0, YZMAX
+} PLANE;
+
+static const int plane_fi[6][5] = {
+		{ 14, 15, 16, 17, 18 }, /* XY0 */
+		{ 0, 1, 2, 3, 4 },		/* XYMAX */
+		{ 4, 11, 12, 13, 18 },	/* XZ0 */
+		{ 0, 5, 6, 7, 14 },		/* XZMAX */
+		{ 3, 7, 10, 13, 17 },	/* YZ0 */
+		{ 1, 5, 8, 11, 15 }		/* YZMAX */
+};
+
+static inline int inb(int x, int y, int z, int xmax, int ymax, int zmax) {
+	return  x > 0 && x < xmax + 1 &&
+			y > 0 && y < ymax + 1 &&
+			z > 0 && z < zmax + 1;
+}
+
+void treatBoundary(double *collideField, int* flagField, const double * const wallVelocity, const int *xlength) {
+	/* XY plane */
+	int xmax = xlength[0] + 1;
+	int ymax = xlength[1] + 1;
+	int zmax = xlength[2] + 1;
+	double density = 0;
+	double *currentCell;
+	int dx, dy, dz;
+
+	/* XY plane */
+	for (int x = 0; x < xlength[0] + 2; ++x) {
+		for (int y = 0; y < xlength[1] + 2; ++y) {
+			for (int z = 0; z < xlength[2] + 2; ++z) {
+				for (int i = 0; i < Q; ++i) {
+					/* Bottom, z = 0: Invert 0, 1, 2, 3, 4 */
+					/*index = plane_fi[XY0][i];*/
+					dx = LATTICEVELOCITIES[i][0];
+					dy = LATTICEVELOCITIES[i][1];
+					dz = LATTICEVELOCITIES[i][2];
+					if (inb(x+dx, y+dy, z+dz, xmax, ymax, zmax)) {
+					/*if (x+dx > 0 && x+dx < xmax+1 &&
+						y+dy > 0 && y+dy < ymax+1 &&
+						z+dz > 0 && z+dz < zmax+1) {*/
+						switch (flagField[fidx(xlength, x, y, z)]) {
+						case NO_SLIP:
+						{
+							collideField[idx(xlength, x, y, z, i)] = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
+						}
+						break;
+						case MOVING_WALL:
+						{
+							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
+							/* Moving wall */
+							double cdotu = 0.0;
+							for (int d = 0; d < D; ++d) {
+								cdotu += LATTICEVELOCITIES[i][d] * wallVelocity[d];
+							}
+							/* Take first distribution function of current cell */
+							currentCell = &collideField[idx(xlength, x, y, z, 0)];
+							computeDensity(currentCell, &density);
+							/* End moving wall */
+							collideField[idx(xlength, x, y, z, i)] = finv + 2*LATTICEWEIGHTS[i]*density*cdotu/(C_S*C_S);
+						}
+						break;
+						case FLUID:
+							break;
+						default:
+							printf("None\n");
+						}
+					}
+				}
+			}
+		}
+	}
+}
+#else
+void treatBoundary(double *collideField, int* flagField,
+		const double * const inputParameters, const int *xlength) {
 	int i, x, y, z, dx, dy, dz;
 	int nx = xlength[0]; /*substitution for the sake of simplicity*/
 	int ny = xlength[1];
 	int nz = xlength[2];
-	double *currentCell;
-	double finv, cu = 0;
+	double finv;
+	double cu = 0;
 	double density;
+	double *currentCell;
 
 	/*Going through the hole boundary domain*/
 
@@ -60,7 +138,7 @@ void treatBoundary(double *collideField, int* flagField,
 						x+dz > 0 && x+dz < nz + 1) {
 
 						finv = collideField[idx(xlength, z+dx, y+dy, x+dz, inv(i))];
-
+					#if 1 /* No wall velocity*/
 						/*Additional term when we are considering moving-wall (top plane - k=1)*/
 						/*Velocity of the moving-wall is taken into account*/
 						if(k == 1) {
@@ -68,16 +146,17 @@ void treatBoundary(double *collideField, int* flagField,
 							computeDensity(currentCell, &density);
 							cu = 0; /*dot product of c_i and velocity of wall*/
 							for (int d = 0; d < D; ++d) {
-								cu += LATTICEVELOCITIES[i][d] * wallVelocity[d];
+								cu += LATTICEVELOCITIES[i][d] * inputParameters[d];
 							}
 							finv += 2*LATTICEWEIGHTS[i]*density*cu/(C_S*C_S);
 						}
+					#endif
 						collideField[idx(xlength, z, y, x, i)] = finv;
 					}
 				}
 			}
 		}
 	}
-#endif
 }
 
+#endif
