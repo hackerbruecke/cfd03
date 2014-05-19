@@ -49,10 +49,12 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 					dz = LATTICEVELOCITIES[i][2];
 
 					if (inb(x+dx, y+dy, z+dz, xmax, ymax, zmax) && flagField[fidx(xlength, x+dx, y+dy, z+dz)] == FLUID) {
+						double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
+
 						switch (flagField[fidx(xlength, x, y, z)]) {
 						case NO_SLIP:
 						{
-							collideField[idx(xlength, x, y, z, i)] = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
+							collideField[idx(xlength, x, y, z, i)] = finv;
 						}
 						break;
 						case MOVING_WALL:
@@ -63,7 +65,6 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 								cdotu += LATTICEVELOCITIES[i][d] * wallVelocity[d];
 							}
 							/* End moving wall */
-							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
 							collideField[idx(xlength, x, y, z, i)] = finv + 2*LATTICEWEIGHTS[i]*rho*cdotu/(C_S*C_S);
 						}
 						break;
@@ -130,7 +131,6 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 						break;
 						case OUTFLOW:
 						{
-							double finv = collideField[idx(xlength, x+dx, y+dy, z+dz, inv(i))];
 							collideField[idx(xlength, x, y, z, i)] = feq_out[inv(i)] + feq_out[i] - finv;
 						}
 						break;
@@ -138,7 +138,7 @@ void treatBoundary(double *collideField, int* flagField, const double * const wa
 							/* Pressure in conditions TODO: Crosscheck! */
 							computeVelocity(currentCell, &rho_in, v_in);
 							computeFeq(&rho_in, v_in, feq_in);
-							collideField[idx(xlength, x, y, z, i)] = feq_in[i];
+							collideField[idx(xlength, x, y, z, i)] = feq_in[inv(i)] + feq_in[i] - finv;
 							break;
 						}
 					}
