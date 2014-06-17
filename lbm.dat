@@ -1,9 +1,0 @@
-tau=1.8
-vwallx=.1
-vwally=0
-vwallz=0
-xlength=8
-ylength=8
-zlength=20
-timesteps=5000
-timestepsPerPlotting=10

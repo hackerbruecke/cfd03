@@ -10,13 +10,16 @@ int readParameters(
     double *velocityWall,               /* velocity of the lid. Parameter name: "characteristicvelocity" */
     int *timesteps,                     /* number of timesteps. Parameter name: "timesteps" */
     int *timestepsPerPlotting,          /* timesteps between subsequent VTK plots. Parameter name: "vtkoutput" */
+    char *problem,
+    double denref,
+    double*dense,
     int argc,                           /* number of arguments. Should equal 2 (program + name of config file */
     char *argv[]                        /* argv[1] shall contain the path to the config file */
 );
 
 
 /* initialises the particle distribution functions and the flagfield */
-void initialiseFields(double *collideField, double *streamField,int *flagField, const int *xlength);
+void initialiseFields(double *collideField, double *streamField,int *flagField, int *xlength, char *problem);
 
 #endif
 

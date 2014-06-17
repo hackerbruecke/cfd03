@@ -1,36 +1,38 @@
 #include "streaming.h"
 #include "LBDefinitions.h"
 
-void doStreaming(double *collideField, double *streamField, int *flagField, const int *xlength){
+void doStreaming(double *collideField, double *streamField, int *flagField,
+		int *xlength) {
 
 	int dx, dy, dz;
 	double fi;
 	/*Setting distribution function for each moving direction/lattice velocity of every particle*/
-	for (int z = 1; z < xlength[2] + 1; ++z) {
-		for (int y = 1; y < xlength[1] + 1; ++y) {
-			for (int x = 1; x < xlength[0] + 1; ++x) {
-				for (int i = 0; i < Q; ++i) {
+	for (int z = 0; z < xlength[2] + 2; ++z) {
+		for (int y = 0; y < xlength[1] + 2; ++y) {
+			for (int x = 0; x < xlength[0] + 2; ++x) {
 
-					/*dx = c_i_x*dt, dt = 1*/
-					dx = LATTICEVELOCITIES[i][0];
-					dy = LATTICEVELOCITIES[i][1];
-					dz = LATTICEVELOCITIES[i][2];
+				/*Check for the cell to be FLUID*/
+				if (flagField[fidx(xlength, x, y, z)] == FLUID) {
+					for (int i = 0; i < Q; ++i) {
 
-					/*New value for our distribution function (DF) of the index 'i'
+						/*dx = c_i_x*dt, dt = 1*/
+						dx = LATTICEVELOCITIES[i][0];
+						dy = LATTICEVELOCITIES[i][1];
+						dz = LATTICEVELOCITIES[i][2];
 
-					(We set it to DF(i) of the next particle, whose i-th lattice velocity
-					points towards considered particle (x,y,z))
+						/*New value for our distribution function (DF) of the index 'i'
 
-					Position of that next particle is given by (x-dx, y-dy, z-dz)*/
+						 (We set it to DF(i) of the next particle, whose i-th lattice velocity
+						 points towards considered particle (x,y,z))
 
-//					fi = collideField[Q * ((z-dz)*(xlength[2]+2)*(xlength[2]+2) + (y-dy)*(xlength[1]+2) + x-dx) + i];
-					fi = collideField[idx(xlength, x-dx, y-dy, z-dz, i)];
-//					streamField[Q * (z*(xlength[2]+2)*(xlength+2) + y*(xlength+2) + x) + i] = fi;
-					streamField[idx(xlength, x, y, z, i)] = fi;
+						 Position of that next particle is given by (x-dx, y-dy, z-dz)*/
+
+						fi = collideField[idx(xlength, x - dx, y - dy, z - dz,
+								i)];
+						streamField[idx(xlength, x, y, z, i)] = fi;
+					}
 				}
 			}
 		}
 	}
-
 }
-

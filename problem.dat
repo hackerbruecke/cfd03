@@ -1,0 +1,36 @@
+timestepsPerPlotting		100
+
+#       1 - A Titled Plane
+
+xlength1			212
+ylength1			3
+zlength1			492
+velocityWallx1		0.0
+velocityWally1		0.0
+velocityWallz1		0.035
+tau1				0.59
+timesteps1			10000
+
+
+#       2 - Plane Shear Flow
+
+xlength2			8
+ylength2			8
+zlength2			20
+denref				1.0
+dense				1.005
+tau2				1.8
+timesteps2			5000
+
+
+
+#		3 - Flow over a Step
+
+xlength3			30
+ylength3			30
+zlength3			50
+velocityWallx3		0.0
+velocityWally3		0.0
+velocityWallz3		0.05
+tau3				0.6
+timesteps3			10000

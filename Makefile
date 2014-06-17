@@ -20,7 +20,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) 
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) *.vtk
+	rm -f $(OBJECTS) $(EXECUTABLE)
 
 
 $(OBJECTS): %.o : %.c
